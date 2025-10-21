@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: infrabin
+  namespace: infrabin
+  labels:
+    release: kube-prometheus-stack 
+spec:
+  selector:
+    matchLabels:
+      app: infrabin
+  namespaceSelector:
+    matchNames: ["infrabin"]
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 15s
+    relabelings:
+    - action: replace
+      targetLabel: __address__
+      replacement: infrabin.infrabin.svc.cluster.local:8000

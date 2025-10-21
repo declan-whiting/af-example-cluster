@@ -1,0 +1,27 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: infrabin-allow-only-ingress-and-prom
+  namespace: infrabin
+spec:
+  selector:
+    matchLabels:
+      app: infrabin
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals:
+        - "cluster.local/ns/istio-ingress/sa/istio-ingressgateway"
+    to:
+    - operation:
+        ports: ["8080"]
+
+  - from:
+    - source:
+        principals:
+        - "cluster.local/ns/monitoring/sa/kube-prometheus-stack-prometheus"
+    to:
+    - operation:
+        ports: ["8080"]
+        paths: ["/metrics"]

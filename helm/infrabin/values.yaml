@@ -1,0 +1,59 @@
+image:
+  repository: decw/infrabin
+  tag: latest
+  pullPolicy: IfNotPresent
+
+labels:
+  app: "infrabin"
+
+replicas: 1
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/path: "/metrics"
+  prometheus.io/port: "8080"
+  sidecar.istio.io/rewriteAppHTTPProbers: "true"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 100
+  runAsGroup: 1000 
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+env:
+  - name: USE_ENVOY_PREFLIGHT
+    value: "true"
+
+ports:
+  - name: http
+    containerPort: 8080
+
+lifecycle:
+  preStop:
+    sleepSeconds: 8  # matches: command: ["sleep","8"]
+
+livenessProbe:
+  path: /healthcheck/liveness
+  port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 3
+
+readinessProbe:
+  path: /healthcheck/readiness
+  port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 1
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
